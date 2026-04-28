@@ -14,13 +14,14 @@
 export function initMobileMenu() {
   const toggle = document.getElementById('mobile-menu-toggle');
   const sidebar = document.querySelector('.sidebar, .docs-sidebar');
+  const navLinks = document.querySelector('.nav-links');
   if (!toggle) return;
 
   const navLinks = document.querySelector('.nav-links');
 
   toggle.addEventListener('click', () => {
     const expanded = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', !expanded);
+    toggle.setAttribute('aria-expanded', String(!expanded));
     sidebar?.classList.toggle('open');
     navLinks?.classList.toggle('open');
     document.body.classList.toggle('menu-open');
