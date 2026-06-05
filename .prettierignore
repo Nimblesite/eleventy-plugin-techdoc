@@ -1,0 +1,14 @@
+# agent-pmo:74cf183
+node_modules/
+package-lock.json
+# Vendored upstream Shipwright schema — kept byte-identical to canonical for re-vendoring.
+.github/shipwright/
+coverage/
+*.tgz
+sample_website/
+**/_site/
+playwright-report/
+test-results/
+.deslop-cache/
+# Nunjucks templates have no Prettier parser — leave them untouched.
+**/*.njk

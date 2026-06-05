@@ -1,0 +1,51 @@
+# agent-pmo:74cf183
+name: ci
+
+# Uniform CI interface: make lint -> make test -> make build. The Shipwright
+# acceptance gates (manifest validation + CLI version contract) run inside those
+# Make targets so drift is caught on every push/PR. [SWR-GATE-CI]
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least-privilege default; no job needs write here. [SWR-SEC-TOKEN-PRIVILEGE]
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.x"
+          cache: "npm"
+
+      # Frozen install — never bare `npm install`. [SWR-SEC-FROZEN-INSTALL]
+      - name: Install (frozen lockfile)
+        run: npm ci
+
+      # eslint + prettier --check + shipwright manifest validation.
+      - name: Lint
+        run: make lint
+
+      # Fail-fast Playwright e2e + CLI version contract + coverage threshold.
+      # [TEST-RULES][COVERAGE-THRESHOLDS-JSON][SWR-GATE-VERIFY-BINARIES]
+      - name: Test
+        run: make test
+
+      # Validate the publishable npm package assembles.
+      - name: Build
+        run: make build

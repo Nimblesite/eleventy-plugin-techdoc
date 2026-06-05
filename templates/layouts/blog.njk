@@ -61,7 +61,7 @@ layout: layouts/base.njk
     </div>
 
     <footer class="blog-post-footer">
-      <a href="{{ langPrefix }}/blog/" class="btn">{{ "blog.back" | t(lang) }}</a>
+      <a href="{{ langPrefix }}/blog/" class="btn">{{ "blog.back" | t(lang) | default("Back to Blog") }}</a>
     </footer>
   </div>
 </article>

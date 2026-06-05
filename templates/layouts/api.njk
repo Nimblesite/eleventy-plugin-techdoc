@@ -8,7 +8,7 @@ layout: layouts/base.njk
   <aside class="sidebar" id="docs-sidebar">
     {% if navigation.api %}
     <div class="sidebar-section">
-      <h4>{{ "nav.apiReference" | t(lang) }}</h4>
+      <h4>{{ "nav.apiReference" | t(lang) | default("API Reference") }}</h4>
       <ul>
         {% for item in navigation.api %}
         <li>
@@ -23,7 +23,7 @@ layout: layouts/base.njk
 
     {% if navigation.docs %}
     <div class="sidebar-section">
-      <h4>{{ "nav.docs" | t(lang) }}</h4>
+      <h4>{{ "nav.docs" | t(lang) | default("Docs") }}</h4>
       <ul>
         {% for section in navigation.docs %}
         {% for item in section.items | limit(3) %}

@@ -1,1 +1,49 @@
+# agent-pmo:74cf183
+# IDE + AI-agent config dirs are intentionally COMMITTED (settings, skills,
+# instructions). Do NOT ignore .vscode/, .claude/, .devcontainer/, etc.
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editor swap/temp files
+*.swp
+*.swo
+*~
+
+# Node / npm
 node_modules/
+*.tgz
+.npm/
+.cache/
+
+# Build output (consumer sample site + any local _site)
+**/_site/
+dist/
+out/
+build/
+
+# Test / coverage artifacts
+coverage/
+coverage-summary.json
+lcov.info
+playwright-report/
+test-results/
+.nyc_output/
+
+# Secrets / local overrides
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+!*.pub.key
+
+# Repo-specific tooling cache
+.deslop-cache/

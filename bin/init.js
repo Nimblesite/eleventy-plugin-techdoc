@@ -1,10 +1,56 @@
 #!/usr/bin/env node
 
-import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
-import { select, input } from '@inquirer/prompts';
+import { writeFileSync, readFileSync, mkdirSync, existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+// `@inquirer/prompts` is imported lazily inside main() so `--version`/`--help` start no
+// runtime and load no heavy dependencies. [SWR-VERSION-CLI-OUTPUT]
 
 const cwd = process.cwd();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// --- Shipwright binary version contract [SWR-VERSION-CLI-OUTPUT][SWR-VERSION-JSON-OUTPUT] ---
+// `--version` prints exactly "<binaryName> <version>", exits 0, starts no runtime, touches no network.
+// Version derives from package metadata, never a hard-coded string [SWR-VERSION-BINDINGS].
+function readVersion() {
+  const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
+  return pkg.version;
+}
+
+function handleCliArgs(argv) {
+  const args = new Set(argv);
+
+  if (args.has("--help") || args.has("-h")) {
+    console.log(
+      `eleventy-plugin-techdoc ${readVersion()}\n\n` +
+        "Usage:\n" +
+        "  eleventy-plugin-techdoc            Scaffold a techdoc Eleventy site in the current directory\n" +
+        "  eleventy-plugin-techdoc --version  Print the version and exit\n" +
+        "  eleventy-plugin-techdoc --help     Show this help and exit"
+    );
+    process.exit(0);
+  }
+
+  if (args.has("--version") || args.has("-v")) {
+    const version = readVersion();
+    if (args.has("--json")) {
+      process.stdout.write(
+        JSON.stringify({
+          manifestVersion: 1,
+          name: "eleventy-plugin-techdoc",
+          version,
+          kind: "cli",
+          language: "javascript",
+        }) + "\n"
+      );
+    } else {
+      console.log(`eleventy-plugin-techdoc ${version}`);
+    }
+    process.exit(0);
+  }
+}
+
+handleCliArgs(process.argv.slice(2));
 
 // CSS style templates
 const cssStyles = {
@@ -276,83 +322,94 @@ pre {
   --color-primary: #00f;
   --color-border: #ccc;
 }
-`
+`,
 };
 
 // Handle package.json separately - merge, don't skip
 function updatePackageJson() {
-  const pkgPath = join(cwd, 'package.json');
+  const pkgPath = join(cwd, "package.json");
 
   const additions = {
-    type: 'module',
+    type: "module",
     scripts: {
-      dev: 'npx @11ty/eleventy --serve',
-      build: 'npx @11ty/eleventy'
-    }
+      dev: "npx @11ty/eleventy --serve",
+      build: "npx @11ty/eleventy",
+    },
   };
 
   if (existsSync(pkgPath)) {
-    const existing = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    const existing = JSON.parse(readFileSync(pkgPath, "utf-8"));
     existing.type = additions.type;
     existing.scripts = { ...existing.scripts, ...additions.scripts };
-    writeFileSync(pkgPath, JSON.stringify(existing, null, 2) + '\n');
-    console.log('  update: package.json (added type, scripts)');
+    writeFileSync(pkgPath, JSON.stringify(existing, null, 2) + "\n");
+    console.log("  update: package.json (added type, scripts)");
   } else {
     const fresh = {
-      name: 'my-site',
-      version: '1.0.0',
+      name: "my-site",
+      version: "1.0.0",
       ...additions,
       dependencies: {
-        '@11ty/eleventy': '^3.1.2',
-        'eleventy-plugin-techdoc': '^0.1.0'
-      }
+        "@11ty/eleventy": "^3.1.2",
+        "eleventy-plugin-techdoc": "^0.1.0",
+      },
     };
-    writeFileSync(pkgPath, JSON.stringify(fresh, null, 2) + '\n');
-    console.log('  create: package.json');
+    writeFileSync(pkgPath, JSON.stringify(fresh, null, 2) + "\n");
+    console.log("  create: package.json");
   }
 }
 
 // Core files always created (minimal structure)
 function getCoreFiles(cssStyle, siteConfig = {}) {
-  const { name = 'My Site', description = 'Built with techdoc', author = '', githubUrl = '', twitterHandle = '', discordUrl = '' } = siteConfig;
+  const {
+    name = "My Site",
+    description = "Built with techdoc",
+    author = "",
+    githubUrl = "",
+    twitterHandle = "",
+    discordUrl = "",
+  } = siteConfig;
 
   // Build footer sections - proper multi-column footer like real sites
   const footerSections = [
     {
-      title: 'Documentation',
+      title: "Documentation",
       items: [
-        { text: 'Getting Started', url: '/docs/' },
-        { text: 'Blog', url: '/blog/' }
-      ]
+        { text: "Getting Started", url: "/docs/" },
+        { text: "Blog", url: "/blog/" },
+      ],
     },
     {
-      title: 'Community',
+      title: "Community",
       items: [
-        ...(githubUrl ? [{ text: 'GitHub', url: githubUrl }] : []),
-        ...(discordUrl ? [{ text: 'Discord', url: discordUrl }] : []),
-        ...(twitterHandle ? [{ text: 'Twitter', url: `https://twitter.com/${twitterHandle.replace('@', '')}` }] : [])
-      ].filter(item => item.url)
+        ...(githubUrl ? [{ text: "GitHub", url: githubUrl }] : []),
+        ...(discordUrl ? [{ text: "Discord", url: discordUrl }] : []),
+        ...(twitterHandle
+          ? [{ text: "Twitter", url: `https://twitter.com/${twitterHandle.replace("@", "")}` }]
+          : []),
+      ].filter((item) => item.url),
     },
     {
-      title: 'More',
-      items: [
-        { text: 'Eleventy', url: 'https://www.11ty.dev' }
-      ]
-    }
-  ].filter(section => section.items.length > 0); // Remove empty sections
+      title: "More",
+      items: [{ text: "Eleventy", url: "https://www.11ty.dev" }],
+    },
+  ].filter((section) => section.items.length > 0); // Remove empty sections
 
   // Build site.json with optional fields
   const siteJson = {
     title: name,
     description: description,
-    url: 'https://example.com',
-    stylesheet: '/assets/css/styles.css'
+    url: "https://example.com",
+    stylesheet: "/assets/css/styles.css",
   };
-  if (author) siteJson.author = author;
-  if (twitterHandle) siteJson.twitterSite = twitterHandle;
+  if (author) {
+    siteJson.author = author;
+  }
+  if (twitterHandle) {
+    siteJson.twitterSite = twitterHandle;
+  }
 
   return {
-    'eleventy.config.js': `import techdoc from "eleventy-plugin-techdoc";
+    "eleventy.config.js": `import techdoc from "eleventy-plugin-techdoc";
 
 export default function(eleventyConfig) {
   eleventyConfig.addPlugin(techdoc, {
@@ -378,19 +435,24 @@ export default function(eleventyConfig) {
 }
 `,
 
-    'src/_data/site.json': JSON.stringify(siteJson, null, 2) + '\n',
+    "src/_data/site.json": JSON.stringify(siteJson, null, 2) + "\n",
 
-    'src/_data/navigation.json': JSON.stringify({
-      main: [
-        { text: 'Docs', url: '/docs/' },
-        { text: 'API', url: '/api/' },
-        { text: 'Blog', url: '/blog/' },
-        ...(githubUrl ? [{ text: 'GitHub', url: githubUrl, external: true }] : [])
-      ],
-      footer: footerSections
-    }, null, 2) + '\n',
+    "src/_data/navigation.json":
+      JSON.stringify(
+        {
+          main: [
+            { text: "Docs", url: "/docs/" },
+            { text: "API", url: "/api/" },
+            { text: "Blog", url: "/blog/" },
+            ...(githubUrl ? [{ text: "GitHub", url: githubUrl, external: true }] : []),
+          ],
+          footer: footerSections,
+        },
+        null,
+        2
+      ) + "\n",
 
-    'src/_data/i18n.json': `{
+    "src/_data/i18n.json": `{
   "en": {
     "blog": {
       "back": "← Back to Blog",
@@ -428,9 +490,9 @@ export default function(eleventyConfig) {
 }
 `,
 
-    'src/assets/css/styles.css': cssStyles[cssStyle],
+    "src/assets/css/styles.css": cssStyles[cssStyle],
 
-    'src/feed.njk': `---json
+    "src/feed.njk": `---json
 {
   "permalink": "feed.xml",
   "eleventyExcludeFromCollections": true
@@ -455,7 +517,7 @@ export default function(eleventyConfig) {
 </feed>
 `,
 
-    'src/sitemap.njk': `---json
+    "src/sitemap.njk": `---json
 {
   "permalink": "sitemap.xml",
   "eleventyExcludeFromCollections": true
@@ -474,7 +536,7 @@ export default function(eleventyConfig) {
 </urlset>
 `,
 
-    'src/robots.txt.njk': `---json
+    "src/robots.txt.njk": `---json
 {
   "permalink": "robots.txt",
   "eleventyExcludeFromCollections": true
@@ -486,7 +548,7 @@ Allow: /
 Sitemap: {{ site.url }}/sitemap.xml
 `,
 
-    'src/llms.txt.njk': `---json
+    "src/llms.txt.njk": `---json
 {
   "permalink": "llms.txt",
   "eleventyExcludeFromCollections": true
@@ -515,14 +577,14 @@ This site contains documentation and resources.
 - RSS Feed: {{ site.url }}/feed.xml
 `,
 
-    'src/_data/languages.json': `{
+    "src/_data/languages.json": `{
   "en": { "code": "en", "nativeName": "English" },
   "zh": { "code": "zh", "nativeName": "中文" },
   "es": { "code": "es", "nativeName": "Español" }
 }
 `,
 
-    'src/index.njk': `---
+    "src/index.njk": `---
 layout: layouts/base.njk
 title: Home
 ---
@@ -531,7 +593,7 @@ title: Home
 <p>Edit <code>src/index.njk</code> to customize this page.</p>
 `,
 
-    'src/docs/index.md': `---
+    "src/docs/index.md": `---
 layout: layouts/docs.njk
 title: Documentation
 eleventyNavigation:
@@ -544,7 +606,7 @@ eleventyNavigation:
 Your documentation goes here.
 `,
 
-    'src/blog/index.njk': `---
+    "src/blog/index.njk": `---
 layout: layouts/base.njk
 title: Blog
 ---
@@ -574,12 +636,16 @@ title: Blog
 
 // Sample content files (optional)
 function getSampleContentFiles(siteConfig = {}) {
-  const { name = 'My Site', author = '', description = 'Documentation and blog powered by techdoc' } = siteConfig;
-  const authorName = author || 'Your Name';
+  const {
+    name = "My Site",
+    author = "",
+    description = "Documentation and blog powered by techdoc",
+  } = siteConfig;
+  const authorName = author || "Your Name";
 
   return {
     // Override eleventy.config.js with i18n enabled
-    'eleventy.config.js': `import techdoc from "eleventy-plugin-techdoc";
+    "eleventy.config.js": `import techdoc from "eleventy-plugin-techdoc";
 
 export default function(eleventyConfig) {
   eleventyConfig.addPlugin(techdoc, {
@@ -609,7 +675,7 @@ export default function(eleventyConfig) {
 }
 `,
 
-    'src/index.njk': `---
+    "src/index.njk": `---
 layout: layouts/base.njk
 title: Home
 lang: en
@@ -642,7 +708,7 @@ permalink: /
 `,
 
     // Chinese home page
-    'src/zh/index.njk': `---
+    "src/zh/index.njk": `---
 layout: layouts/base.njk
 title: 首页
 lang: zh
@@ -674,7 +740,7 @@ permalink: /zh/
 </div>
 `,
 
-    'src/docs/index.md': `---
+    "src/docs/index.md": `---
 layout: layouts/docs.njk
 title: Getting Started
 eleventyNavigation:
@@ -721,7 +787,7 @@ app.doSomething();
 - Visit the [Blog](/blog/) for tutorials and updates
 `,
 
-    'src/docs/api.md': `---
+    "src/docs/api.md": `---
 layout: layouts/docs.njk
 title: API Reference
 eleventyNavigation:
@@ -770,7 +836,7 @@ instance.destroy();
 | \`error\` | \`{ message, code }\` | Fired on error |
 `,
 
-    'src/docs/configuration.md': `---
+    "src/docs/configuration.md": `---
 layout: layouts/docs.njk
 title: Configuration
 eleventyNavigation:
@@ -828,7 +894,7 @@ export default {
 \`\`\`
 `,
 
-    'src/blog/index.njk': `---
+    "src/blog/index.njk": `---
 layout: layouts/base.njk
 title: Blog
 ---
@@ -852,10 +918,10 @@ title: Blog
 </div>
 `,
 
-    'src/blog/hello-world.md': `---
+    "src/blog/hello-world.md": `---
 layout: layouts/blog.njk
 title: Hello World
-date: ${new Date().toISOString().split('T')[0]}
+date: ${new Date().toISOString().split("T")[0]}
 author: ${authorName}
 tags: posts
 excerpt: Welcome to your new blog! This is a sample post to get you started.
@@ -899,10 +965,14 @@ You can use all standard Markdown formatting:
 3. Customize the styling in \`src/assets/css/styles.css\`
 `,
 
-    'src/blog/getting-started-guide.md': `---
+    "src/blog/getting-started-guide.md": `---
 layout: layouts/blog.njk
 title: Getting Started with techdoc
-date: ${(() => { const d = new Date(); d.setDate(d.getDate() - 7); return d.toISOString().split('T')[0]; })()}
+date: ${(() => {
+      const d = new Date();
+      d.setDate(d.getDate() - 7);
+      return d.toISOString().split("T")[0];
+    })()}
 author: ${authorName}
 tags: posts
 excerpt: A quick guide to customizing your new documentation site.
@@ -956,7 +1026,7 @@ All visual styling lives in \`src/assets/css/styles.css\`. The theme provides st
 `,
 
     // Chinese docs
-    'src/zh/docs/index.md': `---
+    "src/zh/docs/index.md": `---
 layout: layouts/docs.njk
 title: 入门指南
 lang: zh
@@ -991,7 +1061,7 @@ app.doSomething();
 \`\`\`
 `,
 
-    'src/zh/docs/api.md': `---
+    "src/zh/docs/api.md": `---
 layout: layouts/docs.njk
 title: API 参考
 lang: zh
@@ -1022,7 +1092,7 @@ function create(options: Options): Instance;
 `,
 
     // Chinese blog
-    'src/zh/blog/index.njk': `---
+    "src/zh/blog/index.njk": `---
 layout: layouts/base.njk
 title: 博客
 lang: zh
@@ -1046,10 +1116,10 @@ permalink: /zh/blog/
 </div>
 `,
 
-    'src/zh/blog/hello-world.md': `---
+    "src/zh/blog/hello-world.md": `---
 layout: layouts/blog.njk
 title: 你好世界
-date: ${new Date().toISOString().split('T')[0]}
+date: ${new Date().toISOString().split("T")[0]}
 author: 你的名字
 tags: posts
 lang: zh
@@ -1091,7 +1161,7 @@ greet('世界');
 `,
 
     // API section
-    'src/api/index.njk': `---
+    "src/api/index.njk": `---
 layout: layouts/base.njk
 title: API Reference
 permalink: /api/
@@ -1109,7 +1179,7 @@ permalink: /api/
 </div>
 `,
 
-    'src/zh/api/index.njk': `---
+    "src/zh/api/index.njk": `---
 layout: layouts/base.njk
 title: API 参考
 lang: zh
@@ -1131,47 +1201,49 @@ permalink: /zh/api/
 }
 
 async function main() {
-  console.log('Scaffolding techdoc site...\n');
+  const { select, input } = await import("@inquirer/prompts");
+
+  console.log("Scaffolding techdoc site...\n");
 
   // Prompt for CSS style
   const cssStyle = await select({
-    message: 'Choose a CSS style:',
+    message: "Choose a CSS style:",
     choices: [
       {
-        name: 'Minimal (default)',
-        value: 'minimal',
-        description: 'Basic CSS custom properties with simple light/dark mode'
+        name: "Minimal (default)",
+        value: "minimal",
+        description: "Basic CSS custom properties with simple light/dark mode",
       },
       {
-        name: 'C64',
-        value: 'c64',
-        description: 'Commodore 64 retro style with blocky monospace font'
+        name: "C64",
+        value: "c64",
+        description: "Commodore 64 retro style with blocky monospace font",
       },
       {
-        name: 'None',
-        value: 'none',
-        description: 'No CSS generated - you provide all styling from scratch'
-      }
+        name: "None",
+        value: "none",
+        description: "No CSS generated - you provide all styling from scratch",
+      },
     ],
-    default: 'minimal'
+    default: "minimal",
   });
 
   // Prompt for sample content
   const includeSampleContent = await select({
-    message: 'Include sample content?',
+    message: "Include sample content?",
     choices: [
       {
-        name: 'Yes (recommended)',
+        name: "Yes (recommended)",
         value: true,
-        description: 'Include sample docs, blog posts, and example config'
+        description: "Include sample docs, blog posts, and example config",
       },
       {
-        name: 'No',
+        name: "No",
         value: false,
-        description: 'Minimal files only - configure from scratch'
-      }
+        description: "Minimal files only - configure from scratch",
+      },
     ],
-    default: true
+    default: true,
   });
 
   let siteConfig;
@@ -1179,41 +1251,41 @@ async function main() {
   if (includeSampleContent) {
     // Sample content = use complete example config (no questions!)
     siteConfig = {
-      name: 'My Awesome Project',
-      description: 'Documentation and blog powered by techdoc',
-      author: 'Your Name',
-      githubUrl: 'https://github.com/your-username/your-project',
-      twitterHandle: '@yourhandle',
-      discordUrl: 'https://discord.gg/example'
+      name: "My Awesome Project",
+      description: "Documentation and blog powered by techdoc",
+      author: "Your Name",
+      githubUrl: "https://github.com/your-username/your-project",
+      twitterHandle: "@yourhandle",
+      discordUrl: "https://discord.gg/example",
     };
-    console.log('\nUsing sample configuration. Edit src/_data/ files to customize.\n');
+    console.log("\nUsing sample configuration. Edit src/_data/ files to customize.\n");
   } else {
     // No sample = ask questions for real config
-    console.log('\nConfiguring your site:\n');
+    console.log("\nConfiguring your site:\n");
 
     const siteName = await input({
-      message: 'Site name:',
-      default: 'My Site'
+      message: "Site name:",
+      default: "My Site",
     });
 
     const siteDescription = await input({
-      message: 'Site description:',
-      default: 'Built with techdoc'
+      message: "Site description:",
+      default: "Built with techdoc",
     });
 
     const authorName = await input({
-      message: 'Author name (optional):',
-      default: ''
+      message: "Author name (optional):",
+      default: "",
     });
 
     const githubUrl = await input({
-      message: 'GitHub URL (optional):',
-      default: ''
+      message: "GitHub URL (optional):",
+      default: "",
     });
 
     const twitterHandle = await input({
-      message: 'Twitter handle (optional, e.g. @username):',
-      default: ''
+      message: "Twitter handle (optional, e.g. @username):",
+      default: "",
     });
 
     siteConfig = {
@@ -1221,12 +1293,12 @@ async function main() {
       description: siteDescription,
       author: authorName,
       githubUrl: githubUrl,
-      twitterHandle: twitterHandle
+      twitterHandle: twitterHandle,
     };
   }
 
   console.log(`Using ${cssStyle} CSS style`);
-  console.log(`Sample content: ${includeSampleContent ? 'yes' : 'no'}\n`);
+  console.log(`Sample content: ${includeSampleContent ? "yes" : "no"}\n`);
 
   updatePackageJson();
 
@@ -1238,7 +1310,7 @@ async function main() {
 
   for (const [path, content] of Object.entries(files)) {
     const fullPath = join(cwd, path);
-    const dir = fullPath.substring(0, fullPath.lastIndexOf('/'));
+    const dir = fullPath.substring(0, fullPath.lastIndexOf("/"));
 
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
@@ -1252,7 +1324,7 @@ async function main() {
     }
   }
 
-  console.log('\nDone! Run: npm run dev');
+  console.log("\nDone! Run: npm run dev");
 }
 
 main().catch(console.error);

@@ -1,0 +1,20 @@
+{
+  "manifestVersion": 1,
+  "product": {
+    "id": "eleventy-plugin-techdoc",
+    "displayName": "eleventy-plugin-techdoc",
+    "version": "0.0.0-dev"
+  },
+  "components": [
+    {
+      "id": "eleventy-plugin-techdoc-cli",
+      "kind": "cli",
+      "language": "javascript",
+      "binaryName": "eleventy-plugin-techdoc",
+      "expectedVersion": "0.0.0-dev",
+      "platforms": ["all"],
+      "sources": ["bundled"],
+      "required": true
+    }
+  ]
+}

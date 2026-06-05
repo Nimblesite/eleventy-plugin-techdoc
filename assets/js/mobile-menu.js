@@ -12,16 +12,18 @@
  * Mobile menu toggle - handles sidebar visibility on mobile
  */
 export function initMobileMenu() {
-  const toggle = document.getElementById('mobile-menu-toggle');
-  const sidebar = document.querySelector('.sidebar, .docs-sidebar');
-  const navLinks = document.querySelector('.nav-links');
-  if (!toggle) return;
+  const toggle = document.getElementById("mobile-menu-toggle");
+  const sidebar = document.querySelector(".sidebar, .docs-sidebar");
+  const navLinks = document.querySelector(".nav-links");
+  if (!toggle) {
+    return;
+  }
 
-  toggle.addEventListener('click', () => {
-    const expanded = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', String(!expanded));
-    sidebar?.classList.toggle('open');
-    navLinks?.classList.toggle('open');
-    document.body.classList.toggle('menu-open');
+  toggle.addEventListener("click", () => {
+    const expanded = toggle.getAttribute("aria-expanded") === "true";
+    toggle.setAttribute("aria-expanded", String(!expanded));
+    sidebar?.classList.toggle("open");
+    navLinks?.classList.toggle("open");
+    document.body.classList.toggle("menu-open");
   });
 }

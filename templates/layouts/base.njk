@@ -155,7 +155,7 @@
           {% endif %}
           <a href="{{ navUrl }}" {% if item.external %}target="_blank" rel="noopener noreferrer"{% endif %}
              class="nav-link {% if (item.url == '/' and (page.url == '/' or page.url == '/index.html' or page.url == ('/' + currentLang + '/') or page.url == ('/' + currentLang + '/index.html'))) or (item.url != '/' and item.url | length > 1 and (page.url.startsWith(item.url) or page.url.startsWith(navUrl))) %}active{% endif %}">
-            {{ item.text }}
+            {% if item.i18nKey and currentLang != defaultLanguage %}{{ item.i18nKey | t(currentLang) | default(item.text) }}{% else %}{{ item.text }}{% endif %}
           </a>
         </li>
         {% endfor %}
@@ -208,14 +208,14 @@
         {% set currentLang = lang | default('en') %}
         {% for section in navigation.footer %}
         <div class="footer-section">
-          <h3>{{ section.title }}</h3>
+          <h3>{% if section.i18nKey and currentLang != defaultLanguage %}{{ section.i18nKey | t(currentLang) | default(section.title) }}{% else %}{{ section.title }}{% endif %}</h3>
           <ul>
             {% for item in section.items %}
             {% set footerUrl = item.url %}
             {% if item.url.startsWith('/') and currentLang != defaultLanguage %}
               {% set footerUrl = item.url | altLangUrl('en', currentLang) %}
             {% endif %}
-            <li><a href="{{ footerUrl }}">{{ item.text }}</a></li>
+            <li><a href="{{ footerUrl }}">{% if item.i18nKey and currentLang != defaultLanguage %}{{ item.i18nKey | t(currentLang) | default(item.text) }}{% else %}{{ item.text }}{% endif %}</a></li>
             {% endfor %}
           </ul>
         </div>
