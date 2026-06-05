@@ -16,8 +16,10 @@ jobs:
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
-    # Protected environment (tag restriction + reviewer) configured in repo settings.
-    environment: release
+    # Deployment environment 'NPM Deployment' (created via gh CLI). Add reviewer /
+    # tag-restriction protection rules in repo settings if you want a manual gate.
+    # The npm Trusted Publisher config MUST use this exact environment name.
+    environment: "NPM Deployment"
     permissions:
       contents: write   # create the GitHub Release
       id-token: write    # npm Trusted Publisher OIDC + provenance attestation
