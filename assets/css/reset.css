@@ -15,50 +15,27 @@
  * ╚══════════════════════════════════════════════════════════════════════════╝
  *
  * techdoc reset.css
- * Minimal CSS reset NO colors, NO typography choices
+ * Deliberately minimal so the theme NEVER clobbers the consuming site's CSS.
+ *
+ * This file intentionally contains NO global content overrides:
+ *   - NO `* { margin: 0; padding: 0 }`  (would wipe the host site's spacing)
+ *   - NO `ul, ol { list-style: none }`   (would strip bullets from host content)
+ *   - NO line-height / font-smoothing / overflow-wrap  (typography is the host's)
+ *   - NO img / table / form element overrides            (content is the host's)
+ *
+ * The theme resets ONLY the structural elements it actually owns (nav, sidebar,
+ * footer lists, theme buttons). Those scoped resets live in layout.css. The
+ * single global rule below is box-sizing, which every consuming site expects,
+ * is required by techdoc's grid/flex layout, and is overridable per-element.
  */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-}
-
+/* Prevent iOS text-size inflation. Not a visual/typographic choice. */
 html {
   -webkit-text-size-adjust: 100%;
-}
-
-body {
-  min-height: 100vh;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-
-img, picture, video, canvas, svg {
-  display: block;
-  max-width: 100%;
-}
-
-input, button, textarea, select {
-  font: inherit;
-}
-
-p, h1, h2, h3, h4, h5, h6 {
-  overflow-wrap: break-word;
-}
-
-a {
-  text-decoration-skip-ink: auto;
-}
-
-ul, ol {
-  list-style: none;
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
 }

@@ -1,6 +1,6 @@
 {
   "name": "eleventy-plugin-techdoc",
-  "version": "0.1.0",
+  "version": "0.0.0-dev",
   "description": "Minimal structural Eleventy theme for tech documentation - no colors, no styling, just structure",
   "type": "module",
   "main": "lib/index.js",

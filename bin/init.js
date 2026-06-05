@@ -1,10 +1,54 @@
 #!/usr/bin/env node
 
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
-import { select, input } from '@inquirer/prompts';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+// `@inquirer/prompts` is imported lazily inside main() so `--version`/`--help` start no
+// runtime and load no heavy dependencies. [SWR-VERSION-CLI-OUTPUT]
 
 const cwd = process.cwd();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// --- Shipwright binary version contract [SWR-VERSION-CLI-OUTPUT][SWR-VERSION-JSON-OUTPUT] ---
+// `--version` prints exactly "<binaryName> <version>", exits 0, starts no runtime, touches no network.
+// Version derives from package metadata, never a hard-coded string [SWR-VERSION-BINDINGS].
+function readVersion() {
+  const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
+  return pkg.version;
+}
+
+function handleCliArgs(argv) {
+  const args = new Set(argv);
+
+  if (args.has('--help') || args.has('-h')) {
+    console.log(
+      `eleventy-plugin-techdoc ${readVersion()}\n\n` +
+      'Usage:\n' +
+      '  eleventy-plugin-techdoc            Scaffold a techdoc Eleventy site in the current directory\n' +
+      '  eleventy-plugin-techdoc --version  Print the version and exit\n' +
+      '  eleventy-plugin-techdoc --help     Show this help and exit'
+    );
+    process.exit(0);
+  }
+
+  if (args.has('--version') || args.has('-v')) {
+    const version = readVersion();
+    if (args.has('--json')) {
+      process.stdout.write(JSON.stringify({
+        manifestVersion: 1,
+        name: 'eleventy-plugin-techdoc',
+        version,
+        kind: 'cli',
+        language: 'node',
+      }) + '\n');
+    } else {
+      console.log(`eleventy-plugin-techdoc ${version}`);
+    }
+    process.exit(0);
+  }
+}
+
+handleCliArgs(process.argv.slice(2));
 
 // CSS style templates
 const cssStyles = {
@@ -1131,6 +1175,8 @@ permalink: /zh/api/
 }
 
 async function main() {
+  const { select, input } = await import('@inquirer/prompts');
+
   console.log('Scaffolding techdoc site...\n');
 
   // Prompt for CSS style

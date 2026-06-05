@@ -1,0 +1,88 @@
+name: release
+
+# Tag-triggered: set version from the tag -> gate -> publish to npm with provenance.
+# [SWR-REL-WORKFLOW]
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+# Least-privilege default; write/id-token are granted on the publish job only. [SWR-SEC-TOKEN-PRIVILEGE]
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    # Protected environment (tag restriction + reviewer) configured in repo settings.
+    environment: release
+    permissions:
+      contents: write   # create the GitHub Release
+      id-token: write    # npm Trusted Publisher OIDC + provenance attestation
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      # npm >= 11.5 is required for Trusted Publisher OIDC auth. [SWR-SEC-OIDC-PUBLISH]
+      - name: Upgrade npm (Trusted Publisher OIDC)
+        run: npm install -g npm@latest
+
+      # Frozen install. [SWR-SEC-FROZEN-INSTALL]
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set version and npm tag from git tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          NPM_TAG=latest
+          if [[ "$VERSION" == *-* ]]; then NPM_TAG=beta; fi
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "NPM_TAG=$NPM_TAG" >> "$GITHUB_OUTPUT"
+
+      # Stamp every version carrier from the tag, in the runner working tree ONLY — never committed.
+      # The tagged SHA keeps 0.0.0-dev in source. [SWR-VERSION-BUILD-STAMPING]
+      - name: Stamp package.json
+        run: npm version "${{ steps.version.outputs.VERSION }}" --no-git-tag-version --allow-same-version
+      - name: Stamp shipwright.json
+        run: |
+          node -e '
+            const fs = require("fs");
+            const v = process.argv[1];
+            const m = JSON.parse(fs.readFileSync("shipwright.json", "utf8"));
+            m.product.version = v;
+            for (const c of m.components) c.expectedVersion = v;
+            fs.writeFileSync("shipwright.json", JSON.stringify(m, null, 2) + "\n");
+          ' "${{ steps.version.outputs.VERSION }}"
+
+      # CI gate before publish: the CLI must report the stamped version. [SWR-GATE-VERIFY-BINARIES]
+      - name: Verify CLI --version matches the tag
+        run: |
+          test "$(node bin/init.js --version)" = "eleventy-plugin-techdoc ${{ steps.version.outputs.VERSION }}"
+
+      # npm Trusted Publisher OIDC — no NPM_TOKEN; provenance attestation generated.
+      # [SWR-SEC-OIDC-PUBLISH][SWR-SEC-PROVENANCE][SWR-REL-NPM]
+      - name: Publish to npm
+        run: npm publish --tag ${{ steps.version.outputs.NPM_TAG }} --provenance --access public
+
+      - name: Pack tarball
+        run: npm pack
+
+      - name: GitHub Release
+        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.5
+        with:
+          files: eleventy-plugin-techdoc-${{ steps.version.outputs.VERSION }}.tgz
+          name: eleventy-plugin-techdoc ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}

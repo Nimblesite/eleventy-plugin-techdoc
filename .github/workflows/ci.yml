@@ -1,0 +1,59 @@
+name: ci
+
+# Acceptance gates run on every push/PR so manifest + version-contract drift is caught early.
+# [SWR-GATE-CI]
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# Least-privilege default; no job needs write here. [SWR-SEC-TOKEN-PRIVILEGE]
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.x'
+
+      # Frozen install — never bare `npm install`. [SWR-SEC-FROZEN-INSTALL]
+      - name: Install (frozen lockfile)
+        run: npm ci
+
+      # Validate the manifest against the schema. [SWR-GATE-CI]
+      - name: Validate Shipwright manifest
+        run: npx --yes @nimblesite/shipwright-validate-manifest shipwright.json
+
+      # [SWR-GATE-VERIFY-BINARIES] — `--version` prints exactly "<binaryName> <version>".
+      - name: Verify CLI --version
+        run: |
+          expected="eleventy-plugin-techdoc $(node -p "require('./package.json').version")"
+          actual="$(node bin/init.js --version)"
+          echo "$actual"
+          test "$actual" = "$expected"
+
+      # [SWR-VERSION-JSON-OUTPUT] — `--version --json` conforms to version-manifest.schema.json.
+      - name: Verify CLI --version --json
+        run: |
+          node bin/init.js --version --json
+          node bin/init.js --version --json | node -e '
+            const o = JSON.parse(require("fs").readFileSync(0, "utf-8"));
+            if (o.manifestVersion !== 1 || o.name !== "eleventy-plugin-techdoc" || o.kind !== "cli" || !o.version || !o.language) {
+              console.error("version --json does not conform"); process.exit(1);
+            }'
+
+      # The repo's own test suite (Playwright). Runs once the committed tests/ and
+      # sample_website/ fixtures exist; until then it is skipped with a warning, not silently dropped.
+      - name: Test
+        run: |
+          if [ -d tests ] && [ -d sample_website ]; then
+            npm test
+          else
+            echo "::warning::Skipping 'npm test' — committed tests/ and sample_website/ fixtures are not present"
+          fi

@@ -21,12 +21,30 @@
 
 /* Site structure */
 body {
+  margin: 0;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 main {
   flex: 1;
+}
+
+/* Theme-owned resets — scoped so reset.css can stay global-free and never
+   clobber the consuming site's content lists, buttons, or spacing. */
+.nav-links,
+.sidebar ul,
+.footer-section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.theme-toggle,
+.language-btn,
+.mobile-menu-toggle {
+  font: inherit;
 }
 
 /* Header */
@@ -77,6 +95,13 @@ main {
 
 .docs-content {
   max-width: var(--content-width, 65ch);
+}
+
+/* Keep content media inside the theme's content columns. Scoped to theme
+   containers so the host site's images elsewhere are never affected. */
+.docs-content img,
+.blog-post img {
+  max-width: 100%;
 }
 
 /* Blog layout */
