@@ -1,0 +1,5 @@
+{
+  "_agent_pmo": "74cf183",
+  "_doc": "Single source of truth for coverage thresholds. See REPO-STANDARDS-SPEC [COVERAGE-THRESHOLDS-JSON]. Read by the private _coverage_check recipe inside `make test`. NO GitHub repo variables, NO env vars, NO public `make coverage-check` target. This theme is validated with Playwright e2e tests; per-line unit-coverage instrumentation is not wired yet, so the measured floor is 0 and the threshold ratchets UP (never down) as unit tests are added.",
+  "default_threshold": 0
+}

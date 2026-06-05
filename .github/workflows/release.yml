@@ -5,8 +5,8 @@ name: release
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
 
 # Least-privilege default; write/id-token are granted on the publish job only. [SWR-SEC-TOKEN-PRIVILEGE]
 permissions:
@@ -21,8 +21,8 @@ jobs:
     # The npm Trusted Publisher config MUST use this exact environment name.
     environment: "NPM Deployment"
     permissions:
-      contents: write   # create the GitHub Release
-      id-token: write    # npm Trusted Publisher OIDC + provenance attestation
+      contents: write # create the GitHub Release
+      id-token: write # npm Trusted Publisher OIDC + provenance attestation
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
@@ -31,9 +31,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
 
       # npm >= 11.5 is required for Trusted Publisher OIDC auth. [SWR-SEC-OIDC-PUBLISH]
       - name: Upgrade npm (Trusted Publisher OIDC)

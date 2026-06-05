@@ -1,4 +1,5 @@
-# Keeps SHA-pinned GitHub Actions and npm deps fresh. [SWR-SEC-ACTION-PINNING]
+# Dependabot: weekly version updates for GitHub Actions and npm dependencies.
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates
 version: 2
 updates:
   - package-ecosystem: github-actions

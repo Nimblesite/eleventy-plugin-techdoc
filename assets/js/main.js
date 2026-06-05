@@ -16,9 +16,9 @@
  * ║  Then run: ./update-techdoc.sh to sync changes                          ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  */
-import { initThemeToggle } from './theme-toggle.js';
-import { initMobileMenu } from './mobile-menu.js';
-import { initLanguageSwitcher } from './language-switcher.js';
+import { initThemeToggle } from "./theme-toggle.js";
+import { initMobileMenu } from "./mobile-menu.js";
+import { initLanguageSwitcher } from "./language-switcher.js";
 
 initThemeToggle();
 initMobileMenu();

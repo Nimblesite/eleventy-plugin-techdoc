@@ -62,10 +62,10 @@ export default function (eleventyConfig) {
       description: "Built with techdoc",
     },
     features: {
-      blog: true,      // register blog collections + blog/tag/category pages
-      docs: true,      // register docs collection + docs/api layouts
-      darkMode: true,  // render the dark-mode toggle button
-      i18n: false,     // enable the language switcher + per-language pages
+      blog: true, // register blog collections + blog/tag/category pages
+      docs: true, // register docs collection + docs/api layouts
+      darkMode: true, // render the dark-mode toggle button
+      i18n: false, // enable the language switcher + per-language pages
     },
     i18n: {
       defaultLanguage: "en",
@@ -84,7 +84,7 @@ export default function (eleventyConfig) {
 
 The defaults are `blog: true, docs: true, darkMode: true, i18n: true`; the example above shows the full option shape.
 
-### src/_data/site.json
+### src/\_data/site.json
 
 ```json
 {
@@ -97,7 +97,7 @@ The defaults are `blog: true, docs: true, darkMode: true, i18n: true`; the examp
 
 `stylesheet` points at your CSS; the theme links it after its own structural CSS. Optional fields the base layout will use if present include `author`, `keywords`, `themeColor`, `ogImage`, `twitterSite`, `favicon`, and `organization`.
 
-### src/_data/navigation.json
+### src/\_data/navigation.json
 
 ```json
 {
@@ -146,10 +146,10 @@ The scaffolded `styles.css` and templates reference these variables. Define them
 
 ```css
 :root {
-  --max-width: 1200px;     /* fallback: 1200px */
-  --sidebar-width: 250px;  /* fallback: 250px  */
-  --content-width: 65ch;   /* fallback: 65ch   */
-  --header-height: 60px;   /* fallback: 60px   */
+  --max-width: 1200px; /* fallback: 1200px */
+  --sidebar-width: 250px; /* fallback: 250px  */
+  --content-width: 65ch; /* fallback: 65ch   */
+  --header-height: 60px; /* fallback: 60px   */
 }
 ```
 
@@ -159,12 +159,12 @@ The theme also uses a `--space-*` spacing scale in its layout CSS; override thos
 
 Four layouts are registered (docs/api only register when `features.docs` is on; blog only when `features.blog` is on):
 
-| Layout | Use for | Notable classes |
-| --- | --- | --- |
-| `layouts/base.njk` | HTML shell (head, nav, footer, blocks) | `.site-header`, `.nav`, `.site-footer` |
-| `layouts/docs.njk` | Documentation | `.docs-layout`, `.sidebar`, `.docs-content` |
-| `layouts/blog.njk` | Blog posts | `.blog-post`, `.blog-container` |
-| `layouts/api.njk` | API reference (docs-style; `navigation.json`-driven sidebar) | `.docs-layout`, `.sidebar`, `.docs-content` |
+| Layout             | Use for                                                      | Notable classes                             |
+| ------------------ | ------------------------------------------------------------ | ------------------------------------------- |
+| `layouts/base.njk` | HTML shell (head, nav, footer, blocks)                       | `.site-header`, `.nav`, `.site-footer`      |
+| `layouts/docs.njk` | Documentation                                                | `.docs-layout`, `.sidebar`, `.docs-content` |
+| `layouts/blog.njk` | Blog posts                                                   | `.blog-post`, `.blog-container`             |
+| `layouts/api.njk`  | API reference (docs-style; `navigation.json`-driven sidebar) | `.docs-layout`, `.sidebar`, `.docs-content` |
 
 ```markdown
 ---
@@ -191,7 +191,7 @@ title: My First Post
 date: 2025-01-22
 author: Your Name
 tags: posts
-category: tutorials   # optional
+category: tutorials # optional
 excerpt: A brief summary for the listing page.
 ---
 
@@ -281,3 +281,55 @@ To try changes against a local site, `npm install /path/to/eleventy-plugin-techd
 ## License
 
 MIT
+
+## For AI
+
+Context for coding agents wiring this package into an Eleventy site. Everything below is verified against the package source.
+
+**What it is.** `eleventy-plugin-techdoc` is an ESM (`"type": "module"`) Eleventy **3.x** plugin (peer dependency `@11ty/eleventy` `^3.1.2`, Node 18+). It is a _structural_ theme: it registers layouts, collections, filters, a shortcode, SEO metadata, and structural CSS/JS. It defines **no colors and no visual design** — the consuming site supplies all color/typography through CSS custom properties.
+
+**How it works as a "virtual" theme.** Layouts and SEO pages are injected into the build via Eleventy's `addTemplate()` (Virtual Templates) — they are **not** copied into the site. Reference them as `layout: layouts/<name>.njk`; they resolve from inside the npm package, so `npm update eleventy-plugin-techdoc` picks up new versions with no file syncing. The theme's `assets/` are passthrough-copied to the site at `/techdoc/`, so its CSS loads from `/techdoc/css/*` and JS from `/techdoc/js/main.js`.
+
+**Wiring (prefer this over the interactive CLI).** `npx eleventy-plugin-techdoc` is interactive; an agent should create files directly instead.
+
+`eleventy.config.js`:
+
+```javascript
+import techdoc from "eleventy-plugin-techdoc";
+
+export default function (eleventyConfig) {
+  eleventyConfig.addPlugin(techdoc, {
+    site: { name: "My Site", url: "https://example.com", description: "…" },
+    features: { blog: true, docs: true, darkMode: true, i18n: false },
+    i18n: { defaultLanguage: "en", languages: ["en"] },
+  });
+  eleventyConfig.addPassthroughCopy("src/assets");
+  return { dir: { input: "src", output: "_site" }, markdownTemplateEngine: "njk" };
+}
+```
+
+**Options (full shape; defaults).** `site: { name:"", url:"", description:"" }`; `features: { blog:true, docs:true, darkMode:true, i18n:true }`; `i18n: { defaultLanguage:"en", languages:["en"] }`. `features.docs` gates the `docs`/`api` layouts and the `docs` collection; `features.blog` gates the blog layout, the blog/tag/category pages, and the blog collections; `features.darkMode` renders the toggle button; `features.i18n` renders the language switcher and per-language pages.
+
+**Data files the site must provide** (under `src/_data/`):
+
+- `site.json` — `{ title, description, url, stylesheet }`. Optional fields `base.njk` uses if present: `name, author, keywords, themeColor, ogImage, twitterSite, twitterCreator, favicon, appleTouchIcon, organization{name,logo,sameAs}, searchUrl`.
+- `navigation.json` — `main` (header nav: `[{ text, url, external?, i18nKey? }]`) and `footer` (`[{ title, items: [{ text, url }] }]`). `api.njk` also reads optional `api` and `docs` arrays.
+- For i18n: `i18n.json` (nested per-language strings) and `languages.json` (`{ "en": { "code": "en", "nativeName": "English" }, … }`).
+
+**Layouts** (`layout: layouts/<name>.njk`): `base.njk` (HTML shell — head meta, Open Graph/Twitter, JSON-LD, hreflang, header, footer; blocks `head`/`content`/`scripts`), `docs.njk` (sidebar from `eleventyNavigation`; classes `.docs-layout`/`.sidebar`/`.docs-content`), `blog.njk` (`.blog-post`/`.blog-container`), `api.njk` (docs-style; sidebar from `navigation.json`).
+
+**Content conventions.**
+
+- Docs: markdown in `src/docs/**/*.md`, `layout: layouts/docs.njk`, add `eleventyNavigation: { key, order }` for the sidebar.
+- Blog: markdown in `src/blog/*.md`, `layout: layouts/blog.njk`, frontmatter `tags: posts` (required) plus optional `category`, `excerpt`, `author`, `date`.
+- i18n: place non-default-language content under `src/<lang>/…`; per-language blog/tag/category pages are auto-registered.
+
+**Collections** (`collections.*`): `posts`, `tagList`, `categoryList`, `postsByTag`, `postsByCategory`, `docs`. For each non-default language `<lang>`: `<lang>posts`, `<lang>tagList`, `<lang>categoryList`, `<lang>postsByTag`, `<lang>postsByCategory`, `<lang>Docs`.
+
+**Filters:** `dateFormat`, `isoDate`, `dateToRfc3339`, `limit`, `capitalize`, `slugify`, `t` (i18n; returns `undefined` when missing, so chain `| default("…")`), `altLangUrl`, `extractLangFromUrl`, `toOgLocale`. **Shortcode:** `{% year %}`.
+
+**Auto-generated output** (no files needed): `/feed.xml` (Atom, from `posts`), `/sitemap.xml`, `/robots.txt`, `/llms.txt`; the blog index and `/blog/tags/<tag>/`, `/blog/categories/<category>/` (plus per-language variants).
+
+**CSS contract.** The theme loads `/techdoc/css/{reset,layout,utilities}.css`, then the site's `site.stylesheet`. The structural CSS has **no colors**. The site's stylesheet MUST define the color variables the templates use: `--color-bg`, `--color-text`, `--color-primary`, `--color-border`, `--color-muted` — and a `[data-theme="dark"]` block (`base.njk` sets `data-theme` from `localStorage`/`prefers-color-scheme`; the dark-mode button toggles it). Layout variables are optional (the theme uses built-in fallbacks): `--max-width` (1200px), `--sidebar-width` (250px), `--content-width` (65ch), `--header-height` (60px), plus a `--space-*` scale.
+
+**Minimal viable site an agent can generate:** the `eleventy.config.js` above + `src/_data/site.json` + `src/_data/navigation.json` + `src/assets/css/styles.css` (defining the color variables) + `src/index.njk` (`layout: layouts/base.njk`) + a `src/docs/*.md` (`layout: layouts/docs.njk` with `eleventyNavigation`) + optionally `src/blog/*.md` (`tags: posts`). Then run `npx @11ty/eleventy --serve`.

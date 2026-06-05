@@ -11,7 +11,7 @@
  * ║  3. Use CSS custom properties (--var-name) for theming                  ║
  * ║                                                                          ║
  * ║  Example in your styles.css:                                            ║
- * ║    .nav { background: var(--color-bg); }  /* Override nav bg */
+ * ║    .nav { background: var(--color-bg); }   // override nav bg            ║
  * ╚══════════════════════════════════════════════════════════════════════════╝
  *
  * techdoc reset.css

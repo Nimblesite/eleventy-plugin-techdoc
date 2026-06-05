@@ -87,23 +87,23 @@ Extends base. A **docs-style** two-column layout whose sidebar is built from opt
 
 ## Filters
 
-| Filter | Usage | Description |
-| --- | --- | --- |
-| `dateFormat` | `{{ date \| dateFormat }}` | Localized long date (respects page `lang`) |
-| `isoDate` | `{{ date \| isoDate }}` | ISO 8601 timestamp |
-| `dateToRfc3339` | `{{ date \| dateToRfc3339 }}` | RFC 3339 timestamp (feeds/JSON-LD) |
-| `limit` | `{{ posts \| limit(5) }}` | Limit array length |
-| `capitalize` | `{{ str \| capitalize }}` | Capitalize first letter |
-| `slugify` | `{{ str \| slugify }}` | URL-safe slug |
-| `t` | `{{ "key.path" \| t(lang) }}` | i18n lookup (returns `undefined` when missing so `default(...)` applies) |
-| `altLangUrl` | `{{ url \| altLangUrl(currentLang, targetLang) }}` | Map a URL to another language |
-| `extractLangFromUrl` | `{{ url \| extractLangFromUrl(defaultLang) }}` | Detect language prefix in a URL |
-| `toOgLocale` | `{{ lang \| toOgLocale }}` | Map a language code to an `og:locale` (e.g. `en` → `en_US`) |
+| Filter               | Usage                                              | Description                                                              |
+| -------------------- | -------------------------------------------------- | ------------------------------------------------------------------------ |
+| `dateFormat`         | `{{ date \| dateFormat }}`                         | Localized long date (respects page `lang`)                               |
+| `isoDate`            | `{{ date \| isoDate }}`                            | ISO 8601 timestamp                                                       |
+| `dateToRfc3339`      | `{{ date \| dateToRfc3339 }}`                      | RFC 3339 timestamp (feeds/JSON-LD)                                       |
+| `limit`              | `{{ posts \| limit(5) }}`                          | Limit array length                                                       |
+| `capitalize`         | `{{ str \| capitalize }}`                          | Capitalize first letter                                                  |
+| `slugify`            | `{{ str \| slugify }}`                             | URL-safe slug                                                            |
+| `t`                  | `{{ "key.path" \| t(lang) }}`                      | i18n lookup (returns `undefined` when missing so `default(...)` applies) |
+| `altLangUrl`         | `{{ url \| altLangUrl(currentLang, targetLang) }}` | Map a URL to another language                                            |
+| `extractLangFromUrl` | `{{ url \| extractLangFromUrl(defaultLang) }}`     | Detect language prefix in a URL                                          |
+| `toOgLocale`         | `{{ lang \| toOgLocale }}`                         | Map a language code to an `og:locale` (e.g. `en` → `en_US`)              |
 
 ## Shortcodes
 
-| Shortcode | Output |
-| --- | --- |
+| Shortcode    | Output                                     |
+| ------------ | ------------------------------------------ |
 | `{% year %}` | Current year (e.g. for a footer copyright) |
 
 ## Collections
@@ -114,7 +114,7 @@ For each non-default language `<lang>`, the same collections are registered with
 
 ## Required Site Data
 
-### src/_data/site.json
+### src/\_data/site.json
 
 ```json
 {
@@ -125,7 +125,7 @@ For each non-default language `<lang>`, the same collections are registered with
 }
 ```
 
-### src/_data/navigation.json
+### src/\_data/navigation.json
 
 ```json
 {
@@ -153,7 +153,9 @@ The theme's structural CSS contains no colors. Sites define color variables in t
   --color-border: #e5e5e5;
   --color-muted: #666;
 }
-[data-theme="dark"] { /* your dark overrides */ }
+[data-theme="dark"] {
+  /* your dark overrides */
+}
 ```
 
 The theme's layout CSS uses these layout variables **with built-in fallback defaults**, so overriding them is optional: `--max-width` (1200px), `--sidebar-width` (250px), `--content-width` (65ch), `--header-height` (60px), plus a `--space-*` spacing scale.
