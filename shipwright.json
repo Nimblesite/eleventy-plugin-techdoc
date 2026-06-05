@@ -9,7 +9,7 @@
     {
       "id": "eleventy-plugin-techdoc-cli",
       "kind": "cli",
-      "language": "node",
+      "language": "javascript",
       "binaryName": "eleventy-plugin-techdoc",
       "expectedVersion": "0.0.0-dev",
       "platforms": ["all"],

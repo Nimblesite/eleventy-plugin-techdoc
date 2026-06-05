@@ -49,7 +49,7 @@ test:
 lint:
 	npm run lint
 	npm run fmt:check
-	npx --yes @nimblesite/shipwright-validate-manifest shipwright.json
+	npx --yes @nimblesite/shipwright-validate-manifest --schema .github/shipwright/shipwright.schema.json shipwright.json
 
 ## fmt: Format all code in-place. Pass CHECK=1 for read-only verification (CI).
 fmt:

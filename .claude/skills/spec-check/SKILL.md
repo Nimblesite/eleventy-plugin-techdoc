@@ -3,13 +3,14 @@ name: spec-check
 description: Audit spec/plan documents against the codebase. Ensures every spec section has implementing code, tests, and matching logic. Use when the user says "check specs", "spec audit", or "verify specs".
 argument-hint: "[optional spec ID or filename filter]"
 ---
+
 <!-- agent-pmo:74cf183 -->
 
 # spec-check
 
 > **Portable skill.** This skill adapts to the current repository. The agent MUST inspect the repo structure and use judgment to apply these instructions appropriately.
 
-> **Repo context (added).** `eleventy-plugin-techdoc` keeps its spec at **`docs/specs/SPEC.md`** (the techdoc theme specification — matched by the `docs/**/*.md` and `specs/*.md` globs in Step 2), and the codebase/CI also carry Shipwright spec IDs of the form `[SWR-*]` (e.g. `[SWR-GATE-CI]`, `[SWR-SEC-OIDC-PUBLISH]`, `[SWR-VERSION-BUILD-STAMPING]`) embedded as comments in `.github/workflows/ci.yml`, `.github/workflows/release.yml`, and `shipwright.json`. Code files are plain JavaScript (`lib/`, `bin/init.js`) using `//` comments; templates are `.njk` (HTML/XML `<!-- -->` comments); assets are CSS (`/* */`) and JS (`//`); workflows/config are YAML/JSON (`#` comments, or no comments for JSON). Tests are **Playwright** e2e under `tests/` (`*.spec.js`). Note that Check A excludes `docs/` from the *code* search, which is correct — `docs/specs/SPEC.md` is the spec source, not implementing code. None of this context removes or alters any step, check, URL, or report format below.
+> **Repo context (added).** `eleventy-plugin-techdoc` keeps its spec at **`docs/specs/SPEC.md`** (the techdoc theme specification — matched by the `docs/**/*.md` and `specs/*.md` globs in Step 2), and the codebase/CI also carry Shipwright spec IDs of the form `[SWR-*]` (e.g. `[SWR-GATE-CI]`, `[SWR-SEC-OIDC-PUBLISH]`, `[SWR-VERSION-BUILD-STAMPING]`) embedded as comments in `.github/workflows/ci.yml`, `.github/workflows/release.yml`, and `shipwright.json`. Code files are plain JavaScript (`lib/`, `bin/init.js`) using `//` comments; templates are `.njk` (HTML/XML `<!-- -->` comments); assets are CSS (`/* */`) and JS (`//`); workflows/config are YAML/JSON (`#` comments, or no comments for JSON). Tests are **Playwright** e2e under `tests/` (`*.spec.js`). Note that Check A excludes `docs/` from the _code_ search, which is correct — `docs/specs/SPEC.md` is the spec source, not implementing code. None of this context removes or alters any step, check, URL, or report format below.
 
 Audit spec/plan documents against the codebase. Ensures every spec section has implementing code, tests, and that the code logic matches the spec.
 

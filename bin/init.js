@@ -40,7 +40,7 @@ function handleCliArgs(argv) {
           name: "eleventy-plugin-techdoc",
           version,
           kind: "cli",
-          language: "node",
+          language: "javascript",
         }) + "\n"
       );
     } else {
