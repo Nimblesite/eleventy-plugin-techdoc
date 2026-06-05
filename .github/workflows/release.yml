@@ -81,7 +81,7 @@ jobs:
         run: npm pack
 
       - name: GitHub Release
-        uses: softprops/action-gh-release@69320dbe05506a9a39fc8ae11030b214ec2d1f87 # v2.0.5
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           files: eleventy-plugin-techdoc-${{ steps.version.outputs.VERSION }}.tgz
           name: eleventy-plugin-techdoc ${{ github.ref_name }}
