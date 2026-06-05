@@ -1,12 +1,28 @@
 # Dependabot: weekly version updates for GitHub Actions and npm dependencies.
+#
+# Every ecosystem is GROUPED (`patterns: ["*"]`) so each opens ONE combined PR
+# per run instead of one PR per package. Grouping is per-ecosystem — Dependabot
+# cannot merge across ecosystems, so this repo gets at most one github-actions
+# PR and one npm PR, never a single cross-ecosystem PR.
+#
+# Mirrors templates/gh-actions/dependabot.yml from the Shipwright repo.
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates
 version: 2
 updates:
   - package-ecosystem: github-actions
-    directory: /
+    directory: "/"
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
+    open-pull-requests-limit: 5
+
   - package-ecosystem: npm
-    directory: /
+    directory: "/"
     schedule:
       interval: weekly
+    groups:
+      npm:
+        patterns: ["*"]
+    open-pull-requests-limit: 5
