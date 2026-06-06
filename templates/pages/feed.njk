@@ -10,7 +10,7 @@
   <subtitle>{{ site.description }}</subtitle>
   <link href="{{ site.url }}/feed.xml" rel="self"/>
   <link href="{{ site.url }}/"/>
-  <updated>{% if collections.posts | length > 0 %}{{ collections.posts | last | getNewestCollectionItemDate | dateToRfc3339 }}{% else %}{{ "now" | dateToRfc3339 }}{% endif %}</updated>
+  <updated>{% if collections.posts | length > 0 %}{{ collections.posts | getNewestCollectionItemDate | dateToRfc3339 }}{% else %}{{ page.date | dateToRfc3339 }}{% endif %}</updated>
   <id>{{ site.url }}/</id>
   {% if site.author %}<author><name>{{ site.author }}</name></author>{% endif %}
   {%- for post in collections.posts | reverse %}

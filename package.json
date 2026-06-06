@@ -32,13 +32,13 @@
   ],
   "author": "Christian Findlay <christian@melbournedeveloper.com>",
   "license": "MIT",
-  "homepage": "https://github.com/MelbourneDeveloper/eleventy-plugin-techdoc#readme",
+  "homepage": "https://github.com/Nimblesite/eleventy-plugin-techdoc#readme",
   "bugs": {
-    "url": "https://github.com/MelbourneDeveloper/eleventy-plugin-techdoc/issues"
+    "url": "https://github.com/Nimblesite/eleventy-plugin-techdoc/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MelbourneDeveloper/eleventy-plugin-techdoc.git"
+    "url": "git+https://github.com/Nimblesite/eleventy-plugin-techdoc.git"
   },
   "engines": {
     "node": ">=18"
@@ -47,10 +47,10 @@
     "@11ty/eleventy": "^3.1.2"
   },
   "dependencies": {
-    "@11ty/eleventy-navigation": "^0.3.5",
-    "@11ty/eleventy-plugin-rss": "^2.0.2",
+    "@11ty/eleventy-navigation": "^1.0.5",
+    "@11ty/eleventy-plugin-rss": "^3.0.0",
     "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
-    "@inquirer/prompts": "^7.0.0",
+    "@inquirer/prompts": "^8.5.2",
     "markdown-it": "^14.1.0",
     "markdown-it-anchor": "^9.2.0"
   },
