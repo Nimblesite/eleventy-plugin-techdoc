@@ -271,7 +271,7 @@ The theme adds and configures these for you:
 ## Contributing
 
 ```bash
-git clone https://github.com/MelbourneDeveloper/eleventy-plugin-techdoc.git
+git clone https://github.com/Nimblesite/eleventy-plugin-techdoc.git
 cd eleventy-plugin-techdoc
 npm install
 ```
